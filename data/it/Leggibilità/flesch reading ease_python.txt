@@ -1,0 +1,2 @@
+pip install textstat
+textstat.flesch_reading_ease(text)

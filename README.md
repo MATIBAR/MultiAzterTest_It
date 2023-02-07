@@ -2,7 +2,7 @@
 
 # MultiAztertest
 
-You can test the online version of MultiAzterTest at the address http://ixa2.si.ehu.eus/aztertest
+You can test the online version of MultiAzterTest at the address http://ixa2.si.ehu.eus/aztertest (supported languages: English, Basque, Spanish)
 
 Multiaztertest is an upgrade to the Aztertest application meant to evaluate texts in various languages by calculating multiple metrics and indicators of the texts' content and analyzing those results to determine the complexity level of those texts.
 
@@ -39,6 +39,6 @@ Once MultiAztertest has been installed, run it using the following parameters:
 ```
 python3 multiaztertest.py -c -r -f $dir/*.txt -l language -m model -d /home/workdirectory
 ```
-Currently available languages: english, spanish, basque
+Currently available languages: english, spanish, basque (working at adding Italian)
 
-Currently available models: stanford, cube
+Currently available models: stanford

@@ -1,3 +1,0 @@
-Vikidia o txikipedia
-
-

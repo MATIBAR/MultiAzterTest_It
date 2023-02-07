@@ -14,33 +14,10 @@ https://arxiv.org/abs/2109.04870
 ## Install
 
 1. Download `multiaztertest.py` and the `data`, `corpus` and `wordembeddings` folders into the same directory
-2. Use the following commnads to install the necessary operative system packages in Ubuntu 18.04:
->
->**sudo apt install build-essential**
->
->**#dos2unix:to convert plain text files in DOS or Mac format to Unix format**
->
->**sudo apt install dos2unix**
->
->**#python-dev contains everything needed to compile python extension modules**
->
->**sudo apt-get install python3-dev**
->
->**#python3-pip: install pip3 for python3**
->
->**sudo apt install python3-pip**
->
->**#to install textract package in ubuntu 18.04 are necessary the following packages: libpulse-dev and swig**
->
->**sudo apt-get install libpulse-dev**
->
->**sudo apt-get install swig**
-
+2. Create and activate python environment
 3. Use the following commands to install the necessary python packages:
 
 >**pip3 install stanfordnlp**
->
->**pip3 install nlpcube**
 >
 >**pip3 install wordfreq**
 >
@@ -52,9 +29,9 @@ https://arxiv.org/abs/2109.04870
 >
 >**pip3 install --upgrade gensim**
 >
->**apt-get install python-dev libxml2-dev libxslt1-dev antiword unrtf poppler-utils pstotext tesseract-ocr \ flac ffmpeg lame libmad0 libsox-fmt-mp3 sox libjpeg-dev swig**
->
 >**pip install textract**
+
+4. Follow instructions from https://fracpete.github.io/python-weka-wrapper3/install.html to install the python wrapper for Weka
 
 ## Run
 

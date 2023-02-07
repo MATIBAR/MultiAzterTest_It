@@ -106,8 +106,10 @@ class Document:
         self.indicators = defaultdict(float)
         self.aux_lists = defaultdict(list)
         # Constantes
+        #TODO: Understand the meaning of these constants
         self.WORD_FREQ_EN = 4
         self.WORD_FREQ_ES = 4
+        self.WORD_FREQ_IT = 4
         self.WORD_FREQ_EU = 34
 
     @property
@@ -617,6 +619,10 @@ class Document:
         if self.language == "spanish":
             # Flesh=206.84 -60 * P - 1,02 F donde  P, el promedio de sílabas por palabra; F, la media de palabras por frase.
             flesch = 206.84 - 1.02 * (words / sentences) - 60 * (syllables / words)
+        if self.language == "italian":
+            #TODO: Change the metrics computation for the italian
+            # Flesh=206.84 -60 * P - 1,02 F donde  P, el promedio de sílabas por palabra; F, la media de palabras por frase.
+            flesch = 206.84 - 1.02 * (words / sentences) - 60 * (syllables / words)
         if flesch >= 0: self.indicators['flesch'] = round(flesch, 4)
 
     def flesch_kincaid(self):
@@ -680,6 +686,9 @@ class Document:
             self.flesch()
         if self.language == "spanish":
             self.flesch()
+        if self.language == "italian":
+            #TODO: Implement flesch for the italian + GULLPEASE
+            self.flesch()
 
     def calculate_connectives_for(self, sentence, connectives):
         i = self.indicators
@@ -734,6 +743,8 @@ class Document:
             self.wn_lang = "eus"
         elif self.language == "spanish":
             self.wn_lang = "spa"
+        elif self.language == "italian":
+            self.wn_lang = "ita"
         if similarity is not None:
             self.num_features = 512
             self.model = similarity[0]
@@ -780,13 +791,15 @@ class Document:
                             i['prop'] += 1
                         # word frequency
                         if (not len(w.text) == 1 or w.text.isalpha()) and not w.is_num():
-                            if self.language == "spanish" or self.language == "english":
-                                if self.language == "spanish":
-                                    wordfrequency_num = self.WORD_FREQ_ES
-                                    wordfrequency = zipf_frequency(w.text, 'es')
-                                else:
-                                    wordfrequency_num = self.WORD_FREQ_EN
-                                    wordfrequency = zipf_frequency(w.text, 'en')
+                            if self.language == "spanish":
+                                wordfrequency_num = self.WORD_FREQ_ES
+                                wordfrequency = zipf_frequency(w.text, 'es')
+                            elif self.language == "italian":
+                                wordfrequency_num = self.WORD_FREQ_IT
+                                wordfrequency = zipf_frequency(w.text, 'it')
+                            elif self.language == "english":
+                                wordfrequency_num = self.WORD_FREQ_EN
+                                wordfrequency = zipf_frequency(w.text, 'en')
                             elif self.language == "basque":
                                 if w.text in Maiztasuna.freq_list:
                                     wordfrequency_num = self.WORD_FREQ_EU
@@ -1103,7 +1116,7 @@ class Document:
                 # print(num_sil)
             os.system("rm " + str(silaba_name))
             return num_sil
-        if self.language == "english" or self.language == "spanish":
+        if self.language == "english" or self.language == "spanish" or self.language == "italian":
             num_sil = []
             for word in text_without_punctuation:
                 num_sil.append(word.allnum_syllables(self.language))
@@ -1586,6 +1599,9 @@ class Word:
                 return self.syllables_en()
         if lang == "spanish":
             return self.syllables_es()
+        if lang == "italian":
+            #TODO: Implement syllable counter for italian
+            raise ValueError("Syllable counter not implemented for the italian")
 
     def is_lexic_word(self, sequence):
         return self.is_verb(sequence) or self.upos == 'NOUN' or self.upos == 'ADJ' or self.upos == 'ADV'
@@ -1800,6 +1816,8 @@ class Connectives():
             f = open('data/en/Connectives/connectives.txt', 'r', encoding='utf-8')
         if Connectives.lang == "basque":
             f = open('data/eu/Connectives/connectives.txt', 'r', encoding='utf-8')
+        if Connectives.lang == "italian":
+            f = open('data/it/Connectives/connectives.txt', 'r', encoding='utf-8')
         lineas = f.readlines()
         aux = Connectives.temporal
         for linea in lineas:
@@ -1880,7 +1898,14 @@ class Irregularverbs():
                     # carga el verbo en presente, dejando pasado y preterito
                     Irregularverbs.irregular_verbs.append(linea.split()[0])
             f.close()
-
+        if self.lang.lower() == "italian":
+            f = open('data/it/IrregularVerbs/irregularverbs.txt', 'r', encoding='utf-8')
+            lineas = f.readlines()
+            for linea in lineas:
+                if not linea.startswith("//"):
+                    # carga el verbo en presente, dejando pasado y preterito
+                    Irregularverbs.irregular_verbs.append(linea.split()[0])
+            f.close()
 
 class Printer:
 
@@ -1896,6 +1921,7 @@ class Printer:
         self.ignore_list_en_ind = []
         self.ignore_list_es_ind = []
         self.ignore_list_eu_ind = []
+        self.ignore_list_it_ind = []
         self.ignore_list_counters = []
         self.similarity_list = []
 
@@ -2314,6 +2340,21 @@ class Printer:
             'agentless_passive_incidence'
         ]
 
+        self.ignore_list_it_ind = [  # Readability
+            'smog',
+            # vocabulary
+            'num_a1_words', 'num_a1_words_incidence', 'num_a2_words', 'num_a2_words_incidence',
+            'num_b1_words', 'num_b1_words_incidence', 'num_b2_words', 'num_b2_words_incidence',
+            'num_c1_words', 'num_c1_words_incidence', 'num_content_words_not_a1_c1_words',
+            'num_content_words_not_a1_c1_words_incidence',
+            # Word information
+            'num_future', 'num_future_incidence',
+            # Syntax
+            'num_rel_subord', 'num_rel_subord_incidence',
+            'num_pass', 'num_pass_incidence', 'num_pass_mean', 'num_agentless',
+            'agentless_passive_incidence'
+        ]
+
         self.ignore_list_counters = [  # descriptive or shallow measures
             'num_words', 'num_different_forms', 'num_words_with_punct',
             'num_paragraphs', 'num_sentences',
@@ -2473,6 +2514,8 @@ class Printer:
             ignore_list.extend(self.ignore_list_es_ind)
         if self.language == "basque":
             ignore_list.extend(self.ignore_list_eu_ind)
+        if self.language == "italian":
+            ignore_list.extend(self.ignore_list_it_ind)
 
         for key, value in self.ind_sentences.items():
             if key not in ignore_list:
@@ -2528,6 +2571,8 @@ class Printer:
             ignore_list.extend(self.ignore_list_es_ind)
         if self.language == "basque":
             ignore_list.extend(self.ignore_list_eu_ind)
+        if self.language == "italian":
+            ignore_list.extend(self.ignore_list_it_ind)
         # Descriptive 'num_words'
         # Lexical Diversity 'lexical_density'
         # Readability 'ability 'flesch'
@@ -2652,6 +2697,8 @@ class Printer:
             ignore_list.extend(self.ignore_list_es_ind)
         if language == "basque":
             ignore_list.extend(self.ignore_list_eu_ind)
+        if language == "italian":
+            ignore_list.extend(self.ignore_list_it_ind)
 
         for key, value in sorted(self.ind_sentences.items()):
             if key not in ignore_list:
@@ -2680,6 +2727,8 @@ class Printer:
             ignore_list.extend(self.ignore_list_es_ind)
         if language == "basque":
             ignore_list.extend(self.ignore_list_eu_ind)
+        if language == "italian":
+            ignore_list.extend(self.ignore_list_it_ind)
 
         for key, value in sorted(self.ind_sentences.items()):
             # Avoid including of level tag in the dataframe for predictions
@@ -2740,6 +2789,8 @@ class Stopwords:
     # Stopwords.stop_words = stopwords.words('spanish')
     # if self.lang == "basque":
     # Stopwords.stop_words = set(line.strip() for line in open('data/eu/StopWords/stopwords.txt', encoding='utf-8'))
+    # if self.lang == "italian":
+    # Stopwords.stop_words = stopwords.words('italian')
 
     def load(self):
         if self.lang == "english":
@@ -2790,7 +2841,22 @@ class Stopwords:
             f.close()
             # Stopwords.stop_words = set(line.strip() for line in open('/var/www/html/erraztest/eu/stopwords.txt'))
             # line.decode('utf-8').strip()
-
+        if self.lang == "italian":
+            # Stopwords.stop_words = stopwords.words('italian')
+            # Open the file with read only permit
+            f = open('data/it/StopWords/stopwords.txt', encoding='utf-8')
+            # use readline() to read the first line
+            line = f.readline()
+            # use the read line to read further.
+            # If the file is not empty keep reading one line
+            # at a time, till the file is empty
+            while line:
+                # print(line)
+                Stopwords.stop_words.append(line.strip())
+                # use realine() to read next line
+                line = f.readline()
+            f.close()
+            # Stopwords.stop_words = set(line.strip() for line in open('/var/www/html/erraztest/it/stopwords.txt'))
 
 class Predictor:
     def __init__(self, language):
@@ -2807,6 +2873,8 @@ class Predictor:
                 objects = serialization.read_all("models/eu/etrain_eu.model")
             elif self.lang == "spanish":
                 objects = serialization.read_all("models/es/etrain_es.model")
+            elif self.lang == "italian":
+                objects = serialization.read_all("models/it/etrain_it.model")
 
             self.classifier = Classifier(jobject=objects[0])
         except Exception as e:
@@ -2828,7 +2896,7 @@ class Predictor:
             if self.lang == "english":
                 filterToAddLevel = Filter(classname="weka.filters.unsupervised.attribute.Add",
                                           options=["-T", "NOM", "-N", "level", "-L", "0,1,2"])
-            elif self.lang == "basque" or self.lang == "spanish":
+            elif self.lang == "basque" or self.lang == "spanish" or self.lang == "italian":
                 filterToAddLevel = Filter(classname="weka.filters.unsupervised.attribute.Add",
                                           options=["-T", "NOM", "-N", "level", "-L", "0,1"])
 
@@ -2881,14 +2949,10 @@ class NLPCharger:
                 print("-------------You are going to use Spanish model-------------")
                 MODELS_DIR = self.dir + '/es'
                 stanfordnlp.download('es', MODELS_DIR)  # Download the Spanish models
-
-            ### ADDED ###
             elif self.lang == "italian":
                 print("-------------You are going to use Italian model-------------")
                 MODELS_DIR = self.dir + '/it'
                 stanfordnlp.download('it', MODELS_DIR)  # Download the Italian models
-            ##\ ADDED \##
-
             else:
                 print("........You cannot use this language...........")
 
@@ -2955,8 +3019,6 @@ class NLPCharger:
                           'depparse_pretrain_path': MODELS_DIR + '/es_ancora_models/es_ancora.pretrain.pt'
                           }
                 self.parser = stanfordnlp.Pipeline(**config)
-
-            ### ADDED ###
             elif self.lang == "italian":
                 print("-------------You are going to use Italian model-------------")
                 MODELS_DIR = self.dir + '/it'
@@ -2974,7 +3036,6 @@ class NLPCharger:
                           'depparse_pretrain_path': MODELS_DIR + f'/{it_model}_models/{it_model}.pretrain.pt'
                           }
                 self.parser = stanfordnlp.Pipeline(**config)
-            ##\ ADDED \##
 
             else:
                 print("........You cannot use this language...........")
@@ -3092,6 +3153,9 @@ class Similarity:
         elif self.language == "spanish":
             model = gensim.models.KeyedVectors.load_word2vec_format("wordembeddings/es/es.bin", binary=True)
             index2word_set = set(model.wv.index2word)
+        elif self.language == "italian":
+            model = gensim.models.KeyedVectors.load_word2vec_format("wordembeddings/it/it.bin", binary=True)
+            index2word_set = set(model.wv.index2word)
         salida.append(model)
         salida.append(index2word_set)
         return salida
@@ -3138,7 +3202,7 @@ class Main(object):
         required = p.add_argument_group('required arguments')
         required.add_argument('-f', '--files', nargs='+',
                               help='Files to analyze (in .txt, .odt, .doc or .docx format)')
-        required.add_argument('-l', '--language', help='Language to analyze (english, spanish, basque)')
+        required.add_argument('-l', '--language', help='Language to analyze (english, spanish, basque, italian)')
         required.add_argument('-m', '--model', help='Model selected to analyze (stanford)')
         required.add_argument('-d', '--directory', help='Work directory($HOME)')
         # Grupo de argumentos opcionales

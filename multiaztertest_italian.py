@@ -38,11 +38,11 @@ from argparse import ArgumentParser
 import pandas as pd
 import gensim
 
-import weka.core.jvm as jvm
-from weka.core.converters import Loader
-from weka.filters import Filter
-import weka.core.serialization as serialization
-from weka.classifiers import Classifier
+# import weka.core.jvm as jvm
+# from weka.core.converters import Loader
+# from weka.filters import Filter
+# import weka.core.serialization as serialization
+# from weka.classifiers import Classifier
 
 
 # logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
@@ -2858,63 +2858,64 @@ class Stopwords:
             f.close()
             # Stopwords.stop_words = set(line.strip() for line in open('/var/www/html/erraztest/it/stopwords.txt'))
 
-class Predictor:
-    def __init__(self, language):
-        self.lang = language
-        self.classifier = None
+### COMMENTED
+# class Predictor:
+#     def __init__(self, language):
+#         self.lang = language
+#         self.classifier = None
 
-    def load(self):
-        try:
-            jvm.start(max_heap_size="1024m", system_cp=True, packages=True)
-            # Cargamos el modelo
-            if self.lang == "english":
-                objects = serialization.read_all("models/en/etrain_en.model")
-            elif self.lang == "basque":
-                objects = serialization.read_all("models/eu/etrain_eu.model")
-            elif self.lang == "spanish":
-                objects = serialization.read_all("models/es/etrain_es.model")
-            elif self.lang == "italian":
-                objects = serialization.read_all("models/it/etrain_it.model")
+#     def load(self):
+#         try:
+#             jvm.start(max_heap_size="1024m", system_cp=True, packages=True)
+#             # Cargamos el modelo
+#             if self.lang == "english":
+#                 objects = serialization.read_all("models/en/etrain_en.model")
+#             elif self.lang == "basque":
+#                 objects = serialization.read_all("models/eu/etrain_eu.model")
+#             elif self.lang == "spanish":
+#                 objects = serialization.read_all("models/es/etrain_es.model")
+#             elif self.lang == "italian":
+#                 objects = serialization.read_all("models/it/etrain_it.model")
 
-            self.classifier = Classifier(jobject=objects[0])
-        except Exception as e:
-            print(e.__str__())
+#             self.classifier = Classifier(jobject=objects[0])
+#         except Exception as e:
+#             print(e.__str__())
 
-    def stop_jvm(self):
-        jvm.stop()
+#     def stop_jvm(self):
+#         jvm.stop()
 
-    def predict_dificulty(self, path, id_dataframe):
-        pred = 0
-        try:
-            csv_path = path + "/" + id_dataframe + ".csv"
-            loader = Loader(classname="weka.core.converters.CSVLoader")
-            data = loader.load_file(csv_path)
-            os.system("rm " + str(csv_path))
-            filterToAddLevel = None
+#     def predict_dificulty(self, path, id_dataframe):
+#         pred = 0
+#         try:
+#             csv_path = path + "/" + id_dataframe + ".csv"
+#             loader = Loader(classname="weka.core.converters.CSVLoader")
+#             data = loader.load_file(csv_path)
+#             os.system("rm " + str(csv_path))
+#             filterToAddLevel = None
 
-            # the level is added to data (arff) file
-            if self.lang == "english":
-                filterToAddLevel = Filter(classname="weka.filters.unsupervised.attribute.Add",
-                                          options=["-T", "NOM", "-N", "level", "-L", "0,1,2"])
-            elif self.lang == "basque" or self.lang == "spanish" or self.lang == "italian":
-                filterToAddLevel = Filter(classname="weka.filters.unsupervised.attribute.Add",
-                                          options=["-T", "NOM", "-N", "level", "-L", "0,1"])
+#             # the level is added to data (arff) file
+#             if self.lang == "english":
+#                 filterToAddLevel = Filter(classname="weka.filters.unsupervised.attribute.Add",
+#                                           options=["-T", "NOM", "-N", "level", "-L", "0,1,2"])
+#             elif self.lang == "basque" or self.lang == "spanish" or self.lang == "italian":
+#                 filterToAddLevel = Filter(classname="weka.filters.unsupervised.attribute.Add",
+#                                           options=["-T", "NOM", "-N", "level", "-L", "0,1"])
 
-            if filterToAddLevel is None:
-                return 0
-            filterToAddLevel.inputformat(data)
-            data_with_level = filterToAddLevel.filter(data)
-            data_with_level.class_is_last()
+#             if filterToAddLevel is None:
+#                 return 0
+#             filterToAddLevel.inputformat(data)
+#             data_with_level = filterToAddLevel.filter(data)
+#             data_with_level.class_is_last()
 
-            for index, inst in enumerate(data_with_level):
-                pred = self.classifier.classify_instance(inst)
-                # dist = self.classifier.distribution_for_instance(inst)
-                # print(str(index + 1) + ": label index=" + str(pred) + ", class distribution=" + str(dist))
+#             for index, inst in enumerate(data_with_level):
+#                 pred = self.classifier.classify_instance(inst)
+#                 # dist = self.classifier.distribution_for_instance(inst)
+#                 # print(str(index + 1) + ": label index=" + str(pred) + ", class distribution=" + str(dist))
 
-        except Exception as e:
-            print(e.__str__())
+#         except Exception as e:
+#             print(e.__str__())
 
-        return int(pred)
+#         return int(pred)
 
 
 class NLPCharger:
@@ -3167,6 +3168,18 @@ class Similarity:
 # from packageDev.Charger import NLPCharger
 # import re
 
+# class DummyArguments():
+#     def __init__(self):
+#         self.language = 'italian'
+#         self.model = 'stanford'
+#         self.directory =  'C:\Users\root\Desktop\Programmi\Python\NLP\MultiAzterTest_It\models'
+
+#         self.files = ['C:\Users\root\Desktop\Programmi\Python\NLP\MultiAzterTest_It\corpus\it\semplice_complesso\corpus_semplice\Testo_1.txt']
+
+#         self.csv = True
+#         self.ratios = True
+#         self.similarity = False
+
 class Main(object):
     __instance = None
 
@@ -3217,6 +3230,8 @@ class Main(object):
 
         # Por último parsear los argumentos
         opts = p.parse_args()
+
+        print(opts)
 
         language = opts.language
         # language = "spanish"
@@ -3274,9 +3289,10 @@ class Main(object):
         cargador.download_model()
         cargador.load_model()
 
-        # Predictor
-        predictor = Predictor(language)
-        predictor.load()
+        ### COMMENTED
+        # # Predictor
+        # predictor = Predictor(language)
+        # predictor.load()
 
         # Similarity
         similaritymodel = None
@@ -3289,7 +3305,8 @@ class Main(object):
 
         if files is None or len(files) == 0:
              print("*WARNING* At least one input text is needed to execute the tool.")
-             predictor.stop_jvm()
+            ### COMMENTED
+            #  predictor.stop_jvm()
         else:
             ### Files will be created in this folder
             path = Printer.create_directory(files[0])
@@ -3312,13 +3329,17 @@ class Main(object):
                     dfforprediction = printer.createdataframeforprediction(language)
                     id_dataframe = str(uuid.uuid4())
                     dfforprediction.to_csv(os.path.join(path, id_dataframe + ".csv"), encoding='utf-8', index=False)
-                    prediction = predictor.predict_dificulty(path, id_dataframe)
-                    printer.generate_csv(path, input, prediction)  # path, prediction, opts.similarity)
-                    if csv:
-                        df_row = printer.write_in_full_csv(df_row, similarity, language, ratios)
-            if csv:
-                df_row.to_csv(os.path.join(path, "full_results_aztertest.csv"), encoding='utf-8', index=False)
-            predictor.stop_jvm()
+
+                    ### COMMENTED
+                    # prediction = predictor.predict_dificulty(path, id_dataframe)
+                    # printer.generate_csv(path, input, prediction)  # path, prediction, opts.similarity)
+                    # if csv:
+                    #     df_row = printer.write_in_full_csv(df_row, similarity, language, ratios)
+
+            ### COMMENTED
+            # if csv:
+            #     df_row.to_csv(os.path.join(path, "full_results_aztertest.csv"), encoding='utf-8', index=False)
+            # predictor.stop_jvm()
 
 
 
